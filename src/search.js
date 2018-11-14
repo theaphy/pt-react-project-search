@@ -1,68 +1,79 @@
 import { projects } from './data.js';
 
-const projectNames = projects.map(project => project.Name);
-console.log(projectNames);
+class TypeAhead extends React.Component {
+	constructor(props) {
+		super(props);
+		this.state = { items: [], text: '' };
+		this.handleChange = this.handleChange.bind(this);
+		this.handleSubmit = this.handleSubmit.bind(this);
+	}
 
-class TodoApp extends React.Component {
-    constructor(props) {
-      super(props);
-      this.state = { items: [], text: '' };
-      this.handleChange = this.handleChange.bind(this);
-      this.handleSubmit = this.handleSubmit.bind(this);
-    }
-  
-    render() {
-      return (
-        <div>
-          <h3>TODO</h3>
-          <TodoList items={this.state.items} />
-          <form onSubmit={this.handleSubmit}>
-            <label htmlFor="new-todo">
-              What needs to be done?
+	render() {
+		return (
+			<div>
+				<form onSubmit={this.handleSubmit}>
+					<label htmlFor="new-todo">
+						Search for a Project
             </label>
-            <input
-              id="new-todo"
-              onChange={this.handleChange}
-              value={this.state.text}
-            />
-            <button>
-              Add #{this.state.items.length + 1}
+					<input
+						id="new-todo"
+						onChange={this.handleChange}
+						value={this.state.text}
+					/>
+					<button>
+						Search
             </button>
-          </form>
-        </div>
-      );
-    }
-  
-    handleChange(e) {
-      this.setState({ text: e.target.value });
-    }
-  
-    handleSubmit(e) {
-      e.preventDefault();
-      if (!this.state.text.length) {
-        return;
-      }
-      const newItem = {
-        text: this.state.text,
-        id: Date.now()
-      };
-      this.setState(state => ({
-        items: state.items.concat(newItem),
-        text: ''
-      }));
-    }
-  }
-  
-  class TodoList extends React.Component {
-    render() {
-      return (
-        <ul>
-          {this.props.items.map(item => (
-            <li key={item.id}>{item.text}</li>
-          ))}
-        </ul>
-      );
-    }
-  }
-  
-  ReactDOM.render(<TodoApp />, document.getElementById('pt-proj-search'));
+				</form>
+				<TypeAheadList searchTerm={this.state.text} list={projects} matchList={[]} />
+			</div>
+		);
+	}
+
+	handleChange(e) {
+		this.setState({ text: e.target.value });
+
+	}
+
+	handleSubmit(e) {
+		e.preventDefault();
+		if (!this.state.text.length) {
+			return;
+		}
+		const newItem = {
+			text: this.state.text,
+			id: Date.now()
+		};
+		this.setState(state => ({
+			items: state.items.concat(newItem),
+			text: ''
+		}));
+	}
+}
+
+class TypeAheadList extends React.Component {
+	constructor(props) {
+		super(props);
+		this.typeAheadList = [];
+	}
+	
+	render() {
+		return (
+			<ul className="typeahead-list">
+				{this.typeAheadList.map(item => (
+					<h6>{item}</h6>
+				))}
+			</ul>
+		);
+	}
+
+	componentDidUpdate() {
+		let names = this.props.list.map( project => project.Name );
+		let updatedList = names.map(name => {
+			let term = this.props.searchTerm;
+			if(name.toLowerCase().includes(term)) return name;
+		});
+		this.typeAheadList = updatedList;
+	}
+}
+
+ReactDOM.render(<TypeAhead />, document.getElementById('pt-proj-search'));

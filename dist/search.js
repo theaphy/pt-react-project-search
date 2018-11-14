@@ -8,114 +8,123 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 import { projects } from './data.js';
 
-var projectNames = projects.map(function (project) {
-  return project.Name;
-});
-console.log(projectNames);
+var TypeAhead = function (_React$Component) {
+	_inherits(TypeAhead, _React$Component);
 
-var TodoApp = function (_React$Component) {
-  _inherits(TodoApp, _React$Component);
+	function TypeAhead(props) {
+		_classCallCheck(this, TypeAhead);
 
-  function TodoApp(props) {
-    _classCallCheck(this, TodoApp);
+		var _this = _possibleConstructorReturn(this, (TypeAhead.__proto__ || Object.getPrototypeOf(TypeAhead)).call(this, props));
 
-    var _this = _possibleConstructorReturn(this, (TodoApp.__proto__ || Object.getPrototypeOf(TodoApp)).call(this, props));
+		_this.state = { items: [], text: '' };
+		_this.handleChange = _this.handleChange.bind(_this);
+		_this.handleSubmit = _this.handleSubmit.bind(_this);
+		return _this;
+	}
 
-    _this.state = { items: [], text: '' };
-    _this.handleChange = _this.handleChange.bind(_this);
-    _this.handleSubmit = _this.handleSubmit.bind(_this);
-    return _this;
-  }
+	_createClass(TypeAhead, [{
+		key: 'render',
+		value: function render() {
+			return React.createElement(
+				'div',
+				null,
+				React.createElement(
+					'form',
+					{ onSubmit: this.handleSubmit },
+					React.createElement(
+						'label',
+						{ htmlFor: 'new-todo' },
+						'Search for a Project'
+					),
+					React.createElement('input', {
+						id: 'new-todo',
+						onChange: this.handleChange,
+						value: this.state.text
+					}),
+					React.createElement(
+						'button',
+						null,
+						'Search'
+					)
+				),
+				React.createElement(TypeAheadList, { searchTerm: this.state.text, list: projects, matchList: [] })
+			);
+		}
+	}, {
+		key: 'handleChange',
+		value: function handleChange(e) {
+			this.setState({ text: e.target.value });
+		}
+	}, {
+		key: 'handleSubmit',
+		value: function handleSubmit(e) {
+			e.preventDefault();
+			if (!this.state.text.length) {
+				return;
+			}
+			var newItem = {
+				text: this.state.text,
+				id: Date.now()
+			};
+			this.setState(function (state) {
+				return {
+					items: state.items.concat(newItem),
+					text: ''
+				};
+			});
+		}
+	}]);
 
-  _createClass(TodoApp, [{
-    key: 'render',
-    value: function render() {
-      return React.createElement(
-        'div',
-        null,
-        React.createElement(
-          'h3',
-          null,
-          'TODO'
-        ),
-        React.createElement(TodoList, { items: this.state.items }),
-        React.createElement(
-          'form',
-          { onSubmit: this.handleSubmit },
-          React.createElement(
-            'label',
-            { htmlFor: 'new-todo' },
-            'What needs to be done?'
-          ),
-          React.createElement('input', {
-            id: 'new-todo',
-            onChange: this.handleChange,
-            value: this.state.text
-          }),
-          React.createElement(
-            'button',
-            null,
-            'Add #',
-            this.state.items.length + 1
-          )
-        )
-      );
-    }
-  }, {
-    key: 'handleChange',
-    value: function handleChange(e) {
-      this.setState({ text: e.target.value });
-    }
-  }, {
-    key: 'handleSubmit',
-    value: function handleSubmit(e) {
-      e.preventDefault();
-      if (!this.state.text.length) {
-        return;
-      }
-      var newItem = {
-        text: this.state.text,
-        id: Date.now()
-      };
-      this.setState(function (state) {
-        return {
-          items: state.items.concat(newItem),
-          text: ''
-        };
-      });
-    }
-  }]);
-
-  return TodoApp;
+	return TypeAhead;
 }(React.Component);
 
-var TodoList = function (_React$Component2) {
-  _inherits(TodoList, _React$Component2);
+var TypeAheadList = function (_React$Component2) {
+	_inherits(TypeAheadList, _React$Component2);
 
-  function TodoList() {
-    _classCallCheck(this, TodoList);
+	function TypeAheadList(props) {
+		_classCallCheck(this, TypeAheadList);
 
-    return _possibleConstructorReturn(this, (TodoList.__proto__ || Object.getPrototypeOf(TodoList)).apply(this, arguments));
-  }
+		var _this2 = _possibleConstructorReturn(this, (TypeAheadList.__proto__ || Object.getPrototypeOf(TypeAheadList)).call(this, props));
 
-  _createClass(TodoList, [{
-    key: 'render',
-    value: function render() {
-      return React.createElement(
-        'ul',
-        null,
-        this.props.items.map(function (item) {
-          return React.createElement(
-            'li',
-            { key: item.id },
-            item.text
-          );
-        })
-      );
-    }
-  }]);
+		_this2.typeAheadList = [];
+		return _this2;
+	}
 
-  return TodoList;
+	_createClass(TypeAheadList, [{
+		key: 'render',
+		value: function render() {
+			return React.createElement(
+				'ul',
+				{ className: 'typeahead-list' },
+				this.typeAheadList.map(function (item) {
+					return React.createElement(
+						'h6',
+						null,
+						item
+					);
+				})
+			);
+		}
+	}, {
+		key: 'componentDidUpdate',
+		value: function componentDidUpdate() {
+			var _this3 = this;
+
+			var names = this.props.list.map(function (project) {
+				return project.Name;
+			});
+			console.log(names);
+			var updatedList = names.map(function (name) {
+				var term = _this3.props.searchTerm;
+				console.log(name);
+				console.log(term);
+				if (name.toLowerCase().includes(term)) return name;
+			});
+			this.typeAheadList = updatedList;
+		}
+	}]);
+
+	return TypeAheadList;
 }(React.Component);
 
-ReactDOM.render(React.createElement(TodoApp, null), document.getElementById('pt-proj-search'));
+ReactDOM.render(React.createElement(TypeAhead, null), document.getElementById('pt-proj-search'));
