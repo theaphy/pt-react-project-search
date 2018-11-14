@@ -1,79 +1,61 @@
-import { projects } from './data.js';
-
 class TypeAhead extends React.Component {
 	constructor(props) {
 		super(props);
-		this.state = { items: [], text: '' };
+		this.state = { list: [], text: '' };
 		this.handleChange = this.handleChange.bind(this);
-		this.handleSubmit = this.handleSubmit.bind(this);
 	}
 
 	render() {
 		return (
 			<div>
-				<form onSubmit={this.handleSubmit}>
-					<label htmlFor="new-todo">
-						Search for a Project
-            </label>
-					<input
-						id="new-todo"
-						onChange={this.handleChange}
-						value={this.state.text}
-					/>
-					<button>
-						Search
-            </button>
-				</form>
-				<TypeAheadList searchTerm={this.state.text} list={projects} matchList={[]} />
+				<input
+				id="new-todo"
+				onChange={this.handleChange}
+				value={this.state.text}
+				/>
+				<TypeAheadList searchTerm={this.state.text} showList={this.state.list}/>
 			</div>
 		);
 	}
 
-	handleChange(e) {
-		this.setState({ text: e.target.value });
-
+	componentDidMount() {
+		fetch('http://patronicity.local/api/cards/card?type=all')
+			.then(response => response.json())
+			.then(response => this.setState({list: response}));
 	}
 
-	handleSubmit(e) {
-		e.preventDefault();
-		if (!this.state.text.length) {
-			return;
-		}
-		const newItem = {
-			text: this.state.text,
-			id: Date.now()
-		};
-		this.setState(state => ({
-			items: state.items.concat(newItem),
-			text: ''
-		}));
+	handleChange(e) {
+		this.setState({ text: e.target.value });
 	}
 }
 
 class TypeAheadList extends React.Component {
-	constructor(props) {
+	constructor(props){
 		super(props);
-		this.typeAheadList = [];
+		this.typeaheadList = [];
 	}
-	
 	render() {
 		return (
 			<ul className="typeahead-list">
-				{this.typeAheadList.map(item => (
-					<h6>{item}</h6>
-				))}
+				{this.typeaheadList.map(proj =>
+					<li>
+						<p>{proj}</p>
+					</li>
+				)}
 			</ul>
 		);
 	}
 
 	componentDidUpdate() {
-		let names = this.props.list.map( project => project.Name );
-		let updatedList = names.map(name => {
-			let term = this.props.searchTerm;
-			if(name.toLowerCase().includes(term)) return name;
-		});
-		this.typeAheadList = updatedList;
+		const term = this.props.searchTerm;
+		const list = this.props.showList;
+		const typeaheadList = list.map(proj => {
+			const name = proj.Name.toLowerCase();
+			if(name.includes(term)) return name;
+		})
+		this.typeaheadList = typeaheadList;
 	}
+
 }
 
 ReactDOM.render(<TypeAhead />, document.getElementById('pt-proj-search'));
