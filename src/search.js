@@ -19,7 +19,7 @@ class TypeAhead extends React.Component {
 	}
 
 	componentDidMount() {
-		fetch('http://patronicity.local/api/cards/card?type=all')
+		fetch('http://patronicity.local/api/cards/card?type=all&limit=100')
 			.then(response => response.json())
 			.then(response => this.setState({list: response}));
 	}

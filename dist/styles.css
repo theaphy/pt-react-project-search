@@ -1,0 +1,10 @@
+.typeahead-list {
+    max-height: 250px;
+    width: auto;
+    overflow: scroll;
+    border: 1px solid black;
+}
+
+.typeahead-list li:hover  {
+    cursor: pointer;
+}

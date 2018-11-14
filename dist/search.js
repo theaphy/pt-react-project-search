@@ -38,7 +38,7 @@ var TypeAhead = function (_React$Component) {
 		value: function componentDidMount() {
 			var _this2 = this;
 
-			fetch('http://patronicity.local/api/cards/card?type=all').then(function (response) {
+			fetch('http://patronicity.local/api/cards/card?type=all&limit=100').then(function (response) {
 				return response.json();
 			}).then(function (response) {
 				return _this2.setState({ list: response });
