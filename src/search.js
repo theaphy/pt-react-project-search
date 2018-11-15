@@ -1,61 +1,55 @@
 class TypeAhead extends React.Component {
 	constructor(props) {
 		super(props);
-		this.state = { list: [], text: '' };
-		this.handleChange = this.handleChange.bind(this);
+		this.state = {
+			projects: [],
+			text: ''
+		};
+		this.updateTerm = this.updateTerm.bind(this);
+	}
+
+	componentDidMount() {
+		const projects = fetch('http://patronicity.local/api/cards/card?type=all&limit=500')
+			.then(response => response.json())
+			.catch(error => console.error('Error:', error))
+			.then(response => this.setState({ projects: response }))
+	}
+
+	updateTerm(e) {
+		this.setState({ text: e.target.value })
 	}
 
 	render() {
 		return (
 			<div>
 				<input
-				id="new-todo"
-				onChange={this.handleChange}
-				value={this.state.text}
+					type="text"
+					onChange={this.updateTerm}
+					value={this.state.text}
+					placeholder="search for a project"
 				/>
-				<TypeAheadList searchTerm={this.state.text} showList={this.state.list}/>
+				<List term={this.state.text} list={this.state.projects} />
 			</div>
 		);
 	}
-
-	componentDidMount() {
-		fetch('http://patronicity.local/api/cards/card?type=all&limit=100')
-			.then(response => response.json())
-			.then(response => this.setState({list: response}));
-	}
-
-	handleChange(e) {
-		this.setState({ text: e.target.value });
-	}
 }
 
-class TypeAheadList extends React.Component {
-	constructor(props){
-		super(props);
-		this.typeaheadList = [];
-	}
+class List extends React.Component {
 	render() {
 		return (
-			<ul className="typeahead-list">
-				{this.typeaheadList.map(proj =>
-					<li>
-						<p>{proj}</p>
-					</li>
-				)}
-			</ul>
+			<div className="projects">
+				{this.props.list
+					.filter(item => {
+						const name = item.Name.toLowerCase();
+						const term = this.props.term.toLowerCase();
+						if (name.indexOf(term) > -1 && name.indexOf(term) < term.length) return item;
+					})
+					.map(item => (
+						<p className="project" key={item.ID}>{item.Name}</p>
+					))}
+			</div>
 		);
 	}
-
-	componentDidUpdate() {
-		const term = this.props.searchTerm;
-		const list = this.props.showList;
-		const typeaheadList = list.map(proj => {
-			const name = proj.Name.toLowerCase();
-			if(name.includes(term)) return name;
-		})
-		this.typeaheadList = typeaheadList;
-	}
-
 }
 
 ReactDOM.render(<TypeAhead />, document.getElementById('pt-proj-search'));

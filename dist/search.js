@@ -14,91 +14,85 @@ var TypeAhead = function (_React$Component) {
 
 		var _this = _possibleConstructorReturn(this, (TypeAhead.__proto__ || Object.getPrototypeOf(TypeAhead)).call(this, props));
 
-		_this.state = { list: [], text: '' };
-		_this.handleChange = _this.handleChange.bind(_this);
+		_this.state = {
+			projects: [],
+			text: ''
+		};
+		_this.updateTerm = _this.updateTerm.bind(_this);
 		return _this;
 	}
 
 	_createClass(TypeAhead, [{
+		key: 'componentDidMount',
+		value: function componentDidMount() {
+			var _this2 = this;
+
+			var projects = fetch('http://patronicity.local/api/cards/card?type=all&limit=500').then(function (response) {
+				return response.json();
+			}).catch(function (error) {
+				return console.error('Error:', error);
+			}).then(function (response) {
+				return _this2.setState({ projects: response });
+			});
+		}
+	}, {
+		key: 'updateTerm',
+		value: function updateTerm(e) {
+			this.setState({ text: e.target.value });
+		}
+	}, {
 		key: 'render',
 		value: function render() {
 			return React.createElement(
 				'div',
 				null,
 				React.createElement('input', {
-					id: 'new-todo',
-					onChange: this.handleChange,
-					value: this.state.text
+					type: 'text',
+					onChange: this.updateTerm,
+					value: this.state.text,
+					placeholder: 'search for a project'
 				}),
-				React.createElement(TypeAheadList, { searchTerm: this.state.text, showList: this.state.list })
+				React.createElement(List, { term: this.state.text, list: this.state.projects })
 			);
-		}
-	}, {
-		key: 'componentDidMount',
-		value: function componentDidMount() {
-			var _this2 = this;
-
-			fetch('http://patronicity.local/api/cards/card?type=all&limit=100').then(function (response) {
-				return response.json();
-			}).then(function (response) {
-				return _this2.setState({ list: response });
-			});
-		}
-	}, {
-		key: 'handleChange',
-		value: function handleChange(e) {
-			this.setState({ text: e.target.value });
 		}
 	}]);
 
 	return TypeAhead;
 }(React.Component);
 
-var TypeAheadList = function (_React$Component2) {
-	_inherits(TypeAheadList, _React$Component2);
+var List = function (_React$Component2) {
+	_inherits(List, _React$Component2);
 
-	function TypeAheadList(props) {
-		_classCallCheck(this, TypeAheadList);
+	function List() {
+		_classCallCheck(this, List);
 
-		var _this3 = _possibleConstructorReturn(this, (TypeAheadList.__proto__ || Object.getPrototypeOf(TypeAheadList)).call(this, props));
-
-		_this3.typeaheadList = [];
-		return _this3;
+		return _possibleConstructorReturn(this, (List.__proto__ || Object.getPrototypeOf(List)).apply(this, arguments));
 	}
 
-	_createClass(TypeAheadList, [{
+	_createClass(List, [{
 		key: 'render',
 		value: function render() {
+			var _this4 = this;
+
 			return React.createElement(
-				'ul',
-				{ className: 'typeahead-list' },
-				this.typeaheadList.map(function (proj) {
+				'div',
+				{ className: 'projects' },
+				this.props.list.filter(function (item) {
+					var name = item.Name.toLowerCase();
+					var term = _this4.props.term.toLowerCase();
+					if (name.indexOf(term) > -1 && name.indexOf(term) < term.length) return item;
+				}).map(function (item) {
 					return React.createElement(
-						'li',
-						null,
-						React.createElement(
-							'p',
-							null,
-							proj
-						)
+						'p',
+						{ className: 'project', key: item.ID },
+						item.Name
 					);
 				})
 			);
 		}
-	}, {
-		key: 'componentDidUpdate',
-		value: function componentDidUpdate() {
-			var term = this.props.searchTerm;
-			var list = this.props.showList;
-			var typeaheadList = list.map(function (proj) {
-				var name = proj.Name.toLowerCase();
-				if (name.includes(term)) return name;
-			});
-			this.typeaheadList = typeaheadList;
-		}
 	}]);
 
-	return TypeAheadList;
+	return List;
 }(React.Component);
 
 ReactDOM.render(React.createElement(TypeAhead, null), document.getElementById('pt-proj-search'));
